@@ -357,13 +357,13 @@
 }
 
 - (void)takeScreenshot:(FlutterMethodCall*)call result:(FlutterResult)result{
-  UIGraphicsBeginImageContextWithOptions(_webView.bounds.size,YES, _webView.contentScaleFactor);
-  [_webView drawViewHierarchyInRect:_webView.bounds afterScreenUpdates:YES];
-  UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
-  UIGraphicsEndImageContext();
-  NSData *imageData = UIImagePNGRepresentation(newImage);
-  result(imageData);
+  [_webView takeSnapshotWithConfiguration:nil 
+        completionHandler:^(UIImage *snapshotImage, NSError *error){
+        NSData *imageData = UIImagePNGRepresentation(snapshotImage);
+        result(imageData);
+  }];
 }
+
 // Returns nil when successful, or an error message when one or more keys are unknown.
 - (NSString*)applySettings:(NSDictionary<NSString*, id>*)settings {
   NSMutableArray<NSString*>* unknownKeys = [[NSMutableArray alloc] init];
