@@ -167,6 +167,8 @@
     [self getScrollX:call result:result];
   } else if ([[call method] isEqualToString:@"getScrollY"]) {
     [self getScrollY:call result:result];
+  } else if ([[call method] isEqualToString:@"takeScreenshot"]) {
+    [self takeScreenshot:call result:result];
   } else {
     result(FlutterMethodNotImplemented);
   }
@@ -354,6 +356,14 @@
   result([NSNumber numberWithInt:offsetY]);
 }
 
+- (void)takeScreenshot:(FlutterMethodCall*)call result:(FlutterResult)result{
+  UIGraphicsBeginImageContextWithOptions(_webView.bounds.size,YES, _webView.contentScaleFactor);
+  [_webView drawViewHierarchyInRect:_webView.bounds afterScreenUpdates:YES];
+  UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
+  NSData *imageData = UIImagePNGRepresentation(newImage);
+  result(imageData);
+}
 // Returns nil when successful, or an error message when one or more keys are unknown.
 - (NSString*)applySettings:(NSDictionary<NSString*, id>*)settings {
   NSMutableArray<NSString*>* unknownKeys = [[NSMutableArray alloc] init];
