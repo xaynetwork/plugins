@@ -361,15 +361,8 @@ public class FlutterWebView implements PlatformView, MethodCallHandler {
   private void takeScreenshot(Result result){
     View view = getView();
 
-    /// The following solution works properly but the setDrawingCacheEnabled method
-    /// was deprecated in API level 28
-    
-    // view.setDrawingCacheEnabled(true);
-    // Bitmap bm = Bitmap.createBitmap(view.getDrawingCache());
-    // view.setDrawingCacheEnabled(false);
-
     float scale = view.getContext().getResources().getDisplayMetrics().density;
-    int height = (int) (webView.getContentHeight() * scale + 0.5);
+    int height = (int) (webView.getContentHeight() * scale);
 
     Bitmap b = Bitmap.createBitmap(view.getWidth(),
                   height, Bitmap.Config.ARGB_8888);
