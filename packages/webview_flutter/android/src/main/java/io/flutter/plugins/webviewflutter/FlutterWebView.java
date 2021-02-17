@@ -387,7 +387,7 @@ public class FlutterWebView implements PlatformView, MethodCallHandler {
     Bitmap resized = Bitmap.createBitmap(b, rectX, rectY, rectWidth, rectHeight);
 
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    resized.compress(Bitmap.CompressFormat.PNG, 50, stream);
+    resized.compress(Bitmap.CompressFormat.PNG, 100, stream);
     byte[] imageByteArray = stream.toByteArray();
     
     result.success(imageByteArray);
