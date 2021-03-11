@@ -9,13 +9,16 @@
 #import "WebViewManager.h"
 
 @implementation FLTWebViewFactory {
+    
   NSObject<FlutterBinaryMessenger>* _messenger;
+  NSObject<FlutterPluginRegistrar>* _registrar;
 }
 
-- (instancetype)initWithMessenger:(NSObject<FlutterBinaryMessenger>*)messenger {
+- (instancetype)initWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
   self = [super init];
   if (self) {
-    _messenger = messenger;
+    _messenger = registrar.messenger;
+      _registrar = registrar;
   }
   return self;
 }
@@ -30,7 +33,9 @@
   FLTWebViewController* webviewController = [[FLTWebViewController alloc] initWithFrame:frame
                                                                          viewIdentifier:viewId
                                                                               arguments:args
-                                                                        binaryMessenger:_messenger];
+                                                                        binaryMessenger:_messenger
+                                                                        registrar:_registrar
+                                                                              ];
   return webviewController;
 }
 
@@ -72,7 +77,8 @@
 - (instancetype)initWithFrame:(CGRect)frame
                viewIdentifier:(int64_t)viewId
                     arguments:(id _Nullable)args
-              binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger {
+              binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger
+              registrar:(NSObject<FlutterPluginRegistrar>*)registrar {
   if (self = [super init]) {
     _viewId = viewId;
 
@@ -143,12 +149,12 @@
       }
     };
 
-    if ([args[@"hostsToBlock"] isKindOfClass:[NSArray class]]) {
-      NSArray *hosts = args[@"hostsToBlock"];
-      [self setupContentBlockers:hosts completion:loadBlock];
-    } else {
-      loadBlock();
-    }
+//    if ([args[@"hostsToBlock"] isKindOfClass:[NSArray class]]) {
+//      NSArray *hosts = args[@"hostsToBlock"];
+      [self setupContentBlockers:loadBlock registrar:registrar];
+//    } else {
+//      loadBlock();
+//    }
   }
   return self;
 }
@@ -214,21 +220,49 @@
   result([FlutterError errorWithCode:@"updateSettings_failed" message:error details:nil]);
 }
 
-- (void)setupContentBlockers:(NSArray<NSString *> *)hosts completion:(void (^)(void))completion {
-    if ([hosts count] == 0) {
-        completion();
-        return;
-    }
+- (void)setupContentBlockers:(void (^)(void))completion registrar:(NSObject<FlutterPluginRegistrar>*)registrar {
+//    if ([hosts count] == 0) {
+//        completion();
+//        return;
+//    }
+//
     NSString *contentBlockersIdentifier = @"contentBlockersIdentifier";
-    NSString *jsonStringFormat = @"[{\"trigger\":{\"url-filter\":\".*\",\"if-domain\":[%@]},\"action\":{\"type\":\"block\"}}]";
+//    NSString *jsonStringFormat = @"[{\"trigger\":{\"url-filter\":\".*\",\"if-domain\":[%@]},\"action\":{\"type\":\"block\"}}]";
+//
+//    NSMutableArray<NSString *> *formattedHosts = [NSMutableArray arrayWithCapacity:[hosts count]];
+//    [hosts enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//        [formattedHosts addObject:[NSString stringWithFormat:@"\"%@\"", obj]];
+//    }];
+//    // load file adBlockers from filename
+//    // load file trackerBlockers from filename
+//    // jsonString = { firsJson + secondJson }
+//    NSString *hostsString = [formattedHosts componentsJoinedByString:@","];
+
+//    NSArray* dirs = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:sourcePath
+//                                                                        error:NULL];
+//    NSMutableArray *mp3Files = [[NSMutableArray alloc] init];
+//    [dirs enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+//        NSString *filename = (NSString *)obj;
+//        NSString *extension = [[filename pathExtension] lowercaseString];
+//        if ([extension isEqualToString:@"mp3"]) {
+//            [mp3Files addObject:[sourcePath stringByAppendingPathComponent:filename]];
+//        }
+//    }];
+
+    NSString* key = [registrar lookupKeyForAsset:@"blockList.json"];
+    NSLog(@"Key %@", key);
+    NSString* filepath = [[NSBundle mainBundle] pathForResource:key ofType:nil];
+    NSLog(@"Path %@", filepath);
+    NSError *error;
+    NSString *jsonString = [NSString stringWithContentsOfFile:filepath encoding:NSUTF8StringEncoding error:&error];
+
+    if (error)
+        NSLog(@"Error reading file: %@", error.localizedDescription);
+
+    // maybe for debugging...
+    //    NSLog(@"contents: %@", fileContents);
     
-    NSMutableArray<NSString *> *formattedHosts = [NSMutableArray arrayWithCapacity:[hosts count]];
-    [hosts enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [formattedHosts addObject:[NSString stringWithFormat:@"\"%@\"", obj]];
-    }];
-    
-    NSString *hostsString = [formattedHosts componentsJoinedByString:@","];
-    NSString *jsonString = [NSString stringWithFormat:jsonStringFormat, hostsString];
+//    NSString *jsonString = [NSString stringWithFormat:jsonStringFormat, hostsString];
     
     if (@available(iOS 11.0, *)) {
         [WKContentRuleListStore.defaultStore compileContentRuleListForIdentifier:contentBlockersIdentifier encodedContentRuleList:jsonString completionHandler:^(WKContentRuleList *list, NSError *error) {
@@ -238,7 +272,7 @@
                 return;
             }
             
-            [[self->_webView configuration].userContentController addContentRuleList: list];
+            [[self->_webView configuration].userContentController addContentRuleList:list];
             completion();
         }];
     } else {
