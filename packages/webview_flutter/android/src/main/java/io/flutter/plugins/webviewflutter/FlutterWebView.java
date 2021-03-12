@@ -433,6 +433,7 @@ public class FlutterWebView implements PlatformView, MethodCallHandler {
 
     final Bitmap resized = Bitmap.createBitmap(b, rectX, rectY, rectWidth, rectHeight);
 
+    // run the compress function in a secondary thread
     new Thread(new Runnable() {
     @Override
     public void run() {
@@ -440,6 +441,7 @@ public class FlutterWebView implements PlatformView, MethodCallHandler {
       resized.compress(Bitmap.CompressFormat.PNG, 100, stream);
       final byte[] imageByteArray = stream.toByteArray();
 
+      // make sure to return the result in the main thread
       new Handler(Looper.getMainLooper()).post(new Runnable() {
               @Override
               public void run() {
