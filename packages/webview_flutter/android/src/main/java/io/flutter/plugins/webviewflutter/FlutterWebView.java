@@ -405,7 +405,7 @@ public class FlutterWebView implements PlatformView, MethodCallHandler {
   }
 
   private void takeScreenshot(Result result){
-    final Result fResult = result
+    final Result fResult = result;
     View view = getView();
 
     float scale = view.getContext().getResources().getDisplayMetrics().density;
@@ -438,7 +438,7 @@ public class FlutterWebView implements PlatformView, MethodCallHandler {
     @Override
     public void run() {
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
-      resized.compress(Bitmap.CompressFormat.PNG, 100, stream);
+      resized.compress(Bitmap.CompressFormat.PNG, 80, stream);
       final byte[] imageByteArray = stream.toByteArray();
 
       // make sure to return the result in the main thread
