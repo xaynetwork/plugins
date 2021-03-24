@@ -536,56 +536,50 @@
   return true;
 }
 
-- (bool)loadAssetHtmlFile:(NSString*)url {
+- (BOOL)loadAssetHtmlFile:(NSString*)url {
   NSArray* array = [url componentsSeparatedByString:@"?"];
   NSString* pathString = [array objectAtIndex:0];
-  NSLog(@"%@%@", @"pathString: ", pathString);
   NSString* key = [_registrar lookupKeyForAsset:pathString];
   NSURL* baseURL = [[NSBundle mainBundle] URLForResource:key withExtension:nil];
   if (!baseURL) {
-    return false;
+    return NO;
   }
   NSURL* newUrl = baseURL;
   if ([array count] > 1) {
     NSString* queryString = [array objectAtIndex:1];
-    NSLog(@"%@%@", @"queryString: ", queryString);
     NSString* queryPart = [NSString stringWithFormat:@"%@%@", @"?", queryString];
-    NSLog(@"%@%@", @"queryPart: ", queryPart);
     newUrl = [NSURL URLWithString:queryPart relativeToURL:baseURL];
   }
   if (@available(iOS 9.0, *)) {
     [_webView loadFileURL:newUrl allowingReadAccessToURL:[NSURL URLWithString:@"file:///"]];
   } else {
-    return false;
+    return NO;
   }
-  return true;
+  return YES;
 }
 
-- (bool)loadLocalHtmlFile:(NSString*)url {
+- (BOOL)loadLocalHtmlFile:(NSString*)url {
   NSArray* array = [url componentsSeparatedByString:@"?"];
   NSString* pathString = [array objectAtIndex:0];
-  NSLog(@"%@%@", @"pathString: ", pathString);
   NSString* key = [_registrar lookupKeyForAsset:pathString];
   NSURL* baseURL = [[NSBundle mainBundle] URLForResource:key withExtension:nil];
   if (!baseURL) {
     [_webView loadFileURL:[NSURL fileURLWithPath:pathString]
         allowingReadAccessToURL:[NSURL fileURLWithPath:pathString]];
-    return true;
+    return YES;
   }
   NSURL* newUrl = baseURL;
   if ([array count] > 1) {
     NSString* queryString = [array objectAtIndex:1];
-    NSLog(@"%@%@", @"queryString: ", queryString);
     NSString* queryPart = [NSString stringWithFormat:@"%@%@", @"?", queryString];
-    NSLog(@"%@%@", @"queryPart: ", queryPart);
     newUrl = [NSURL URLWithString:queryPart relativeToURL:baseURL];
   }
   if (@available(iOS 9.0, *)) {
     [_webView loadFileURL:newUrl allowingReadAccessToURL:[NSURL URLWithString:@"file:///"]];
   } else {
-    return false;
+    return NO;
   }
-  return true;
+  return YES;
 }
 
 - (void)registerJavaScriptChannels:(NSSet*)channelNames
