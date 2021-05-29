@@ -6,6 +6,7 @@ package io.flutter.plugins.webviewflutter;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Picture;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Handler;
@@ -437,24 +438,20 @@ public class FlutterWebView implements PlatformView, MethodCallHandler {
     result.success(webView.getScrollY());
   }
 
-  private void takeScreenshot(Result result){
+  private void takeScreenshot(Result result) {
     final Result fResult = result;
-    View view = getView();
+    final Picture picture = webView.capturePicture();
+    final Bitmap b = Bitmap.createBitmap( picture.getWidth(), picture.getHeight(), Bitmap.Config.ARGB_8888);
+    final Canvas c = new Canvas(b);
 
-    float scale = view.getContext().getResources().getDisplayMetrics().density;
-    int height = (int) (webView.getContentHeight() * scale);
+    picture.draw(c);
 
-    Bitmap b = Bitmap.createBitmap(view.getWidth(),
-                  height, Bitmap.Config.ARGB_8888);
-    Canvas c = new Canvas(b);
-    view.draw(c);
     int scrollY = webView.getScrollY();
     int measuredHeight = webView.getMeasuredHeight();
     int bitmapHeight = b.getHeight();
-
     int scrollOffset = (scrollY + measuredHeight > bitmapHeight)
                   ? (bitmapHeight - measuredHeight) : scrollY;
-    
+
      if (scrollOffset < 0) {
           scrollOffset = 0;
     }
